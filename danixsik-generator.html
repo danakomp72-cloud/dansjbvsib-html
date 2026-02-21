@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>danixsik generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@100;300;400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #000;
+    --fg: #fff;
+    --accent: #fff;
+    --dim: rgba(255,255,255,0.15);
+    --font-main: 'Montserrat', Arial Narrow, Arial, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-main);
+    font-weight: 300;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    width: 100%;
+    padding: 28px 40px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: #fff;
+  }
+  .logo span { color: rgba(255,255,255,0.3); font-size: 13px; font-family: var(--font-main); letter-spacing: 2px; }
+
+  /* ── LAYOUT ── */
+  .app {
+    width: 100%;
+    max-width: 1100px;
+    padding: 32px 24px 60px;
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 32px;
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 6px;
+  }
+
+  .block {
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 20px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.02);
+  }
+
+  /* ── UPLOAD ── */
+  .upload-area {
+    border: 1px dashed rgba(255,255,255,0.2);
+    border-radius: 2px;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+  }
+  .upload-area:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.03); }
+  .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 32px; opacity: .4; margin-bottom: 10px; }
+  .upload-area p { font-size: 13px; color: rgba(255,255,255,0.4); }
+  .upload-area p strong { color: rgba(255,255,255,0.8); }
+  .upload-name { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 8px; }
+
+  /* ── TEXT AREA ── */
+  .lyrics-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    font-family: var(--font-main);
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1.8;
+    padding: 8px 0;
+    resize: none;
+    outline: none;
+    min-height: 120px;
+    transition: border-color .2s;
+  }
+  .lyrics-input:focus { border-color: rgba(255,255,255,0.5); }
+  .lyrics-input::placeholder { color: rgba(255,255,255,0.2); }
+
+  /* ── CONTROLS ── */
+  .row { display: flex; gap: 12px; align-items: center; }
+  .row.wrap { flex-wrap: wrap; }
+
+  label.ctrl {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+  label.ctrl span { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 1px;
+    background: rgba(255,255,255,0.2);
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  select {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    font-family: var(--font-main);
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    flex: 1;
+  }
+  select option { background: #111; color: #fff; }
+
+  .toggle-row { display: flex; gap: 8px; }
+  .toggle-btn {
+    flex: 1;
+    padding: 9px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.4);
+    font-family: var(--font-main);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all .15s;
+  }
+  .toggle-btn.active {
+    background: #fff;
+    border-color: #fff;
+    color: #000;
+  }
+
+  /* ── BPM ── */
+  .bpm-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 4px;
+    line-height: 1;
+    color: rgba(255,255,255,0.15);
+  }
+  .bpm-display.active { color: #fff; }
+  .bpm-sub { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.2); text-transform: uppercase; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 12px 24px;
+    font-family: var(--font-main);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all .15s;
+    border: none;
+  }
+  .btn-primary {
+    background: #fff;
+    color: #000;
+  }
+  .btn-primary:hover { background: rgba(255,255,255,0.85); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.7);
+  }
+  .btn-outline:hover { border-color: #fff; color: #fff; }
+  .btn-danger {
+    background: transparent;
+    border: 1px solid rgba(255,80,80,0.4);
+    color: rgba(255,100,100,0.7);
+  }
+  .btn-danger:hover { border-color: #f55; color: #f55; }
+
+  /* ── PREVIEW ── */
+  .preview-wrap {
+    position: sticky;
+    top: 24px;
+  }
+  .canvas-container {
+    width: 100%;
+    aspect-ratio: 1;
+    background: #000;
+    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .canvas-container.white-bg { background: #fff; }
+  #previewCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .preview-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    align-items: center;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-bar-wrap {
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+    margin-top: 4px;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: #fff;
+    width: 0%;
+    transition: width .1s;
+  }
+
+  /* ── EXPORT STATUS ── */
+  .export-status {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    padding: 8px;
+    min-height: 30px;
+  }
+  .export-status.ok { color: rgba(100,255,150,0.8); }
+  .export-status.err { color: rgba(255,100,100,0.8); }
+
+  /* ── SEGMENTS LIST ── */
+  .segments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .segments-list::-webkit-scrollbar { width: 2px; }
+  .segments-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+
+  .seg-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 2px;
+    background: rgba(255,255,255,0.02);
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .seg-item:hover { border-color: rgba(255,255,255,0.2); }
+  .seg-item.active { border-color: rgba(255,255,255,0.5); }
+  .seg-idx { font-size: 9px; color: rgba(255,255,255,0.2); width: 16px; flex-shrink: 0; }
+  .seg-text { font-size: 12px; flex: 1; color: rgba(255,255,255,0.7); }
+  .seg-dur {
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .seg-dur input[type=number] {
+    width: 44px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 4px;
+    text-align: center;
+    border-radius: 1px;
+    outline: none;
+    font-family: var(--font-main);
+  }
+
+  /* ── WATERMARK ── */
+  .wm-preview {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.25);
+    text-transform: lowercase;
+    pointer-events: none;
+    font-family: var(--font-main);
+  }
+  .canvas-container.white-bg .wm-preview { color: rgba(0,0,0,0.2); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width: 800px) {
+    .app { grid-template-columns: 1fr; }
+    .preview-wrap { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">danixsik <span>generator</span></div>
+</header>
+
+<div class="app">
+
+  <!-- LEFT PANEL -->
+  <div class="panel">
+
+    <!-- Upload -->
+    <div class="block">
+      <div class="section-label">Видео / Аудио</div>
+      <div class="upload-area" id="uploadArea">
+        <input type="file" id="mediaInput" accept="video/*,audio/*">
+        <div class="upload-icon">▶</div>
+        <p><strong>Выбери файл</strong> или перетащи сюда</p>
+        <p>MP4, MOV, MP3, WAV</p>
+        <div class="upload-name" id="uploadName"></div>
+      </div>
+    </div>
+
+    <!-- Текст -->
+    <div class="block">
+      <div class="section-label">Текст (каждая строка = отдельный блок)</div>
+      <textarea class="lyrics-input" id="lyricsInput" placeholder="паца&#10;дайте&#10;пацаны&#10;дайте мне&#10;дайте мне стра&#10;дайте мне страх&#10;Маша&#10;Маша машенька" rows="8"></textarea>
+      <div style="margin-top:12px">
+        <button class="btn btn-outline" id="parseBtn" style="width:100%">Разбить на сегменты →</button>
+      </div>
+    </div>
+
+    <!-- Сегменты -->
+    <div class="block" id="segmentsBlock" style="display:none">
+      <div class="section-label">Сегменты <span style="color:rgba(255,255,255,0.2)">(нажми чтобы предпросмотреть)</span></div>
+      <div class="segments-list" id="segmentsList"></div>
+      <div style="margin-top:12px; display:flex; gap:8px">
+        <button class="btn btn-outline" id="addSegBtn" style="flex:1">+ Добавить</button>
+        <button class="btn btn-danger" id="clearSegBtn" style="flex:1">Очистить</button>
+      </div>
+    </div>
+
+    <!-- BPM -->
+    <div class="block">
+      <div class="section-label">Ритм и синхронизация</div>
+      <div style="display:flex; align-items:flex-end; gap:16px; margin-bottom:16px">
+        <div>
+          <div class="bpm-display" id="bpmDisplay">--</div>
+          <div class="bpm-sub">BPM</div>
+        </div>
+        <button class="btn btn-outline" id="detectBpmBtn" style="margin-bottom:4px">Определить BPM</button>
+        <label class="ctrl" style="margin-bottom:4px">
+          <span>Ручной BPM</span>
+          <input type="number" id="manualBpm" value="120" min="40" max="300"
+            style="background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.2);
+                   color:#fff;font-family:var(--font-main);font-size:13px;width:70px;outline:none;padding:4px 0">
+        </label>
+      </div>
+      <div class="divider" style="margin-bottom:16px"></div>
+      <div class="section-label">Режим появления текста</div>
+      <div class="toggle-row">
+        <button class="toggle-btn active" data-mode="word" id="modeWord">По слову</button>
+        <button class="toggle-btn" data-mode="half" id="modeHalf">По полуслову</button>
+        <button class="toggle-btn" data-mode="syllable" id="modeSyllable">По слогам</button>
+      </div>
+    </div>
+
+    <!-- Стиль -->
+    <div class="block">
+      <div class="section-label">Оформление</div>
+      <div class="row wrap" style="gap:16px">
+        <label class="ctrl">
+          <span>Фон</span>
+          <div class="toggle-row">
+            <button class="toggle-btn active" data-bg="black" id="bgBlack">Чёрный</button>
+            <button class="toggle-btn" data-bg="white" id="bgWhite">Белый</button>
+          </div>
+        </label>
+        <label class="ctrl">
+          <span>Размер шрифта</span>
+          <input type="range" id="fontSizeRange" min="20" max="90" value="48">
+          <span id="fontSizeVal" style="font-size:11px;color:rgba(255,255,255,0.5);text-align:right">48px</span>
+        </label>
+        <label class="ctrl">
+          <span>Межстрочный интервал</span>
+          <input type="range" id="lineHeightRange" min="30" max="100" value="60">
+          <span id="lineHeightVal" style="font-size:11px;color:rgba(255,255,255,0.5);text-align:right">60px</span>
+        </label>
+        <label class="ctrl">
+          <span>Жирность</span>
+          <select id="fontWeightSel">
+            <option value="100">Thin 100</option>
+            <option value="300" selected>Light 300</option>
+            <option value="400">Regular 400</option>
+            <option value="700">Bold 700</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <!-- Качество -->
+    <div class="block">
+      <div class="section-label">Экспорт</div>
+      <div class="row">
+        <label class="ctrl">
+          <span>Качество</span>
+          <select id="qualitySel">
+            <option value="high">1080p 30fps</option>
+            <option value="medium" selected>720p 30fps</option>
+            <option value="low">480p 30fps</option>
+          </select>
+        </label>
+        <label class="ctrl">
+          <span>Формат</span>
+          <select id="formatSel">
+            <option value="webm">WebM</option>
+            <option value="mp4">MP4 (через FFmpeg)</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+  </div><!-- /panel -->
+
+  <!-- RIGHT: PREVIEW -->
+  <div class="preview-wrap">
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="previewCanvas" width="1080" height="1080"></canvas>
+      <div class="wm-preview">danixsik</div>
+    </div>
+
+    <div class="preview-controls">
+      <button class="btn btn-outline" id="playBtn" style="flex:1">▶ Предпросмотр</button>
+      <button class="btn btn-primary" id="exportBtn" style="flex:1">↓ Экспорт</button>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <div class="export-status" id="exportStatus"></div>
+
+    <!-- Быстрый предпросмотр сегмента -->
+    <div class="block" style="margin-top:16px">
+      <div class="section-label">Текущий кадр</div>
+      <div style="font-size:11px; color:rgba(255,255,255,0.3); margin-top:4px" id="currentSegInfo">Нет сегментов</div>
+    </div>
+
+  </div>
+
+</div><!-- /app -->
+
+<!-- HIDDEN VIDEO -->
+<video id="hiddenVideo" style="display:none" crossorigin="anonymous"></video>
+<audio id="hiddenAudio" style="display:none" crossorigin="anonymous"></audio>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+const state = {
+  mediaFile: null,
+  mediaType: null, // 'video' | 'audio'
+  segments: [],    // [{text, lines:[], duration, animFrames:[]}]
+  bpm: 120,
+  mode: 'word',    // word | half | syllable
+  bg: 'black',
+  fontSize: 48,
+  lineHeight: 60,
+  fontWeight: 300,
+  currentSeg: 0,
+  animFrame: 0,
+  playing: false,
+  rafId: null,
+};
+
+// ═══════════════════════════════════════════════════════
+//  CANVAS
+// ═══════════════════════════════════════════════════════
+const canvas = document.getElementById('previewCanvas');
+const ctx = canvas.getContext('2d');
+
+function getBgColor() { return state.bg === 'black' ? '#000' : '#fff'; }
+function getFgColor() { return state.bg === 'black' ? '#fff' : '#000'; }
+function getWmColor() { return state.bg === 'black' ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)'; }
+
+function drawFrame(seg, visibleCount) {
+  const W = 1080, H = 1080;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = getBgColor();
+  ctx.fillRect(0, 0, W, H);
+
+  if (!seg) {
+    drawWatermark();
+    return;
+  }
+
+  const lines = seg.lines;
+  const visible = Math.min(visibleCount, lines.length);
+  const totalHeight = visible * state.lineHeight;
+  let startY = H / 2 - totalHeight / 2 + state.lineHeight / 2;
+
+  ctx.fillStyle = getFgColor();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  for (let i = 0; i < visible; i++) {
+    const line = lines[i];
+    const isLast = (i === visible - 1);
+    // Последняя (текущая) строка — полный размер, предыдущие чуть меньше
+    const sz = isLast ? state.fontSize : Math.max(state.fontSize - 6, 16);
+    ctx.font = `${state.fontWeight} ${sz}px 'Montserrat', 'Arial Narrow', Arial, sans-serif`;
+    const opacity = isLast ? 1 : 0.7;
+    ctx.globalAlpha = opacity;
+    ctx.fillStyle = getFgColor();
+    ctx.fillText(line, W / 2, startY + i * state.lineHeight);
+  }
+  ctx.globalAlpha = 1;
+  drawWatermark();
+}
+
+function drawWatermark() {
+  ctx.font = `300 22px 'Montserrat', sans-serif`;
+  ctx.fillStyle = getWmColor();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('danixsik', 1080 / 2, 1080 - 36);
+}
+
+// ═══════════════════════════════════════════════════════
+//  PYRAMID: разбивка строки на мини-строки
+// ═══════════════════════════════════════════════════════
+function buildPyramidLines(text) {
+  // Убираем лишние пробелы
+  const clean = text.trim().replace(/\s+/g, ' ');
+  const words = clean.split(' ');
+  if (words.length === 0) return [clean];
+
+  const lines = [];
+  // Максимум 3 слова в первой строке, далее -1
+  let maxWords = Math.min(words.length, 3);
+  let idx = 0;
+
+  while (idx < words.length) {
+    const take = Math.max(1, maxWords);
+    lines.push(words.slice(idx, idx + take).join(' '));
+    idx += take;
+    maxWords = Math.max(1, maxWords - 1);
+  }
+  return lines;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ANIMATION FRAMES
+// ═══════════════════════════════════════════════════════
+function buildAnimFrames(lines, mode) {
+  const frames = [];
+  // mode: word — каждая строка целиком; half — строки появляются попарно; syllable — посложно
+  for (let i = 0; i < lines.length; i++) {
+    if (mode === 'word') {
+      frames.push(i + 1);
+    } else if (mode === 'half') {
+      // Первая половина строки — показываем половину слова последней строки
+      const line = lines[i];
+      const half = Math.ceil(line.length / 2);
+      frames.push({ count: i, partial: line.slice(0, half) });
+      frames.push(i + 1);
+    } else {
+      // syllable: появляем по слогам последнего слова последней строки
+      const syllables = splitSyllables(lines[i]);
+      for (let s = 1; s <= syllables.length; s++) {
+        frames.push({ count: i, partial: syllables.slice(0, s).join('') });
+      }
+      frames.push(i + 1);
+    }
+  }
+  return frames;
+}
+
+// Простое разбиение на слоги (для русского)
+function splitSyllables(word) {
+  const vowels = 'аеёиоуыьъэюяАЕЁИОУЫЬЪЭЮЯaeiouyAEIOUY';
+  const res = [];
+  let cur = '';
+  for (let i = 0; i < word.length; i++) {
+    cur += word[i];
+    const isVowel = vowels.includes(word[i]);
+    const nextIsVowel = i + 1 < word.length && vowels.includes(word[i + 1]);
+    if (isVowel && cur.length >= 1) {
+      // Если следующий символ — согласная перед гласной, отрезаем
+      if (!nextIsVowel || i === word.length - 1) {
+        res.push(cur);
+        cur = '';
+      }
+    }
+  }
+  if (cur) res.push(cur);
+  return res.length ? res : [word];
+}
+
+// ═══════════════════════════════════════════════════════
+//  PARSE LYRICS → SEGMENTS
+// ═══════════════════════════════════════════════════════
+function parseSegments() {
+  const raw = document.getElementById('lyricsInput').value;
+  const lines = raw.split('\n').filter(l => l.trim());
+  const bpmVal = getBpm();
+  const beatDuration = (60 / bpmVal) * 1000; // ms per beat
+
+  state.segments = lines.map((line, i) => {
+    const pyramidLines = buildPyramidLines(line);
+    const animFrames = buildAnimFrames(pyramidLines, state.mode);
+    // Длительность: по числу анимационных кадров * beat
+    const duration = Math.max(animFrames.length * beatDuration, 800);
+    return {
+      text: line,
+      lines: pyramidLines,
+      animFrames,
+      duration: Math.round(duration),
+    };
+  });
+
+  renderSegmentsList();
+  document.getElementById('segmentsBlock').style.display = 'block';
+  if (state.segments.length) {
+    selectSeg(0);
+  }
+}
+
+function renderSegmentsList() {
+  const list = document.getElementById('segmentsList');
+  list.innerHTML = '';
+  state.segments.forEach((seg, i) => {
+    const el = document.createElement('div');
+    el.className = 'seg-item' + (i === state.currentSeg ? ' active' : '');
+    el.innerHTML = `
+      <div class="seg-idx">${i + 1}</div>
+      <div class="seg-text">${seg.lines.join(' / ')}</div>
+      <div class="seg-dur">
+        <input type="number" value="${seg.duration}" min="200" max="10000" step="50"
+          onclick="event.stopPropagation()">
+        <span>ms</span>
+      </div>
+    `;
+    el.querySelector('input').addEventListener('change', e => {
+      state.segments[i].duration = parseInt(e.target.value) || seg.duration;
+    });
+    el.addEventListener('click', () => selectSeg(i));
+    list.appendChild(el);
+  });
+}
+
+function selectSeg(i) {
+  state.currentSeg = i;
+  state.animFrame = 0;
+  document.querySelectorAll('.seg-item').forEach((el, j) => {
+    el.classList.toggle('active', j === i);
+  });
+  const seg = state.segments[i];
+  document.getElementById('currentSegInfo').textContent =
+    `Сегмент ${i + 1}: "${seg.text}" — ${seg.lines.length} строк, ${seg.duration}ms`;
+  drawFrameFromState();
+}
+
+function drawFrameFromState() {
+  const seg = state.segments[state.currentSeg];
+  if (!seg) { drawFrame(null, 0); return; }
+  const frame = seg.animFrames[state.animFrame];
+  if (typeof frame === 'number') {
+    drawFrame(seg, frame);
+  } else {
+    // partial — рисуем с частичным последним словом
+    const partialLines = [...seg.lines.slice(0, frame.count), frame.partial];
+    drawFrame({ lines: partialLines }, partialLines.length);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  BPM DETECTION
+// ═══════════════════════════════════════════════════════
+function getBpm() {
+  const manual = parseInt(document.getElementById('manualBpm').value) || 120;
+  return state.bpm || manual;
+}
+
+async function detectBpm() {
+  if (!state.mediaFile) { setStatus('Сначала загрузи файл', 'err'); return; }
+  setStatus('Анализирую ритм...', '');
+
+  try {
+    const arrayBuffer = await state.mediaFile.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+    const data = decoded.getChannelData(0);
+    const sr = decoded.sampleRate;
+
+    // Энергетический BPM детектор
+    const windowSize = Math.round(sr * 0.023);
+    const energies = [];
+    for (let i = 0; i < data.length - windowSize; i += windowSize) {
+      let e = 0;
+      for (let j = 0; j < windowSize; j++) e += data[i + j] ** 2;
+      energies.push(e / windowSize);
+    }
+
+    // Автокорреляция для нахождения периода
+    const minPeriod = Math.round(60 / 200 * sr / windowSize);
+    const maxPeriod = Math.round(60 / 40 * sr / windowSize);
+    let bestPeriod = minPeriod, bestCorr = -Infinity;
+
+    for (let p = minPeriod; p <= maxPeriod; p++) {
+      let corr = 0;
+      const n = Math.min(energies.length - p, 200);
+      for (let i = 0; i < n; i++) corr += energies[i] * energies[i + p];
+      if (corr > bestCorr) { bestCorr = corr; bestPeriod = p; }
+    }
+
+    const bpm = Math.round(60 / (bestPeriod * windowSize / sr));
+    state.bpm = bpm;
+    const el = document.getElementById('bpmDisplay');
+    el.textContent = bpm;
+    el.classList.add('active');
+    document.getElementById('manualBpm').value = bpm;
+    setStatus(`BPM определён: ${bpm}`, 'ok');
+  } catch (e) {
+    setStatus('Не удалось определить BPM', 'err');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  PLAYBACK PREVIEW
+// ═══════════════════════════════════════════════════════
+function startPreview() {
+  if (!state.segments.length) { setStatus('Сначала добавь текст и нажми «Разбить»', 'err'); return; }
+
+  state.playing = true;
+  document.getElementById('playBtn').textContent = '■ Стоп';
+
+  const video = document.getElementById('hiddenVideo');
+  const audio = document.getElementById('hiddenAudio');
+
+  // Играем медиа
+  if (state.mediaFile) {
+    const url = URL.createObjectURL(state.mediaFile);
+    if (state.mediaType === 'video') {
+      video.src = url; video.play();
+    } else {
+      audio.src = url; audio.play();
+    }
+  }
+
+  let segIdx = 0;
+  let frameIdx = 0;
+  let lastTime = performance.now();
+  const bpmVal = getBpm();
+  const beatMs = (60 / bpmVal) * 1000;
+
+  function tick(now) {
+    if (!state.playing) return;
+    const dt = now - lastTime;
+    const seg = state.segments[segIdx];
+    if (!seg) { stopPreview(); return; }
+
+    const frameInterval = beatMs / Math.max(seg.animFrames.length, 1) * seg.animFrames.length / seg.animFrames.length;
+    const interval = seg.duration / seg.animFrames.length;
+
+    if (dt >= interval) {
+      lastTime = now;
+      const frame = seg.animFrames[frameIdx];
+      if (typeof frame === 'number') {
+        drawFrame(seg, frame);
+      } else {
+        drawFrame({ lines: [...seg.lines.slice(0, frame.count), frame.partial] },
+          frame.count + 1);
+      }
+      frameIdx++;
+      if (frameIdx >= seg.animFrames.length) {
+        frameIdx = 0;
+        segIdx++;
+        state.currentSeg = segIdx;
+        if (segIdx < state.segments.length) renderSegmentsList();
+      }
+    }
+
+    const progress = (segIdx / state.segments.length) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+    state.rafId = requestAnimationFrame(tick);
+  }
+
+  state.rafId = requestAnimationFrame(tick);
+}
+
+function stopPreview() {
+  state.playing = false;
+  if (state.rafId) cancelAnimationFrame(state.rafId);
+  document.getElementById('playBtn').textContent = '▶ Предпросмотр';
+  document.getElementById('hiddenVideo').pause();
+  document.getElementById('hiddenAudio').pause();
+  document.getElementById('progressBar').style.width = '0%';
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════════════════════
+async function exportVideo() {
+  if (!state.segments.length) { setStatus('Нет сегментов для экспорта', 'err'); return; }
+  setStatus('Подготовка экспорта...', '');
+
+  const quality = document.getElementById('qualitySel').value;
+  const fps = 30;
+  let width = 1080, height = 1080;
+  if (quality === 'medium') { width = 720; height = 720; }
+  if (quality === 'low') { width = 480; height = 480; }
+
+  // Создаём off-screen canvas нужного размера
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = width;
+  exportCanvas.height = height;
+  const ectx = exportCanvas.getContext('2d');
+
+  // Считаем общую длину
+  const totalMs = state.segments.reduce((s, seg) => s + seg.duration, 0) + 500;
+
+  // MediaRecorder
+  const stream = exportCanvas.captureStream(fps);
+
+  // Добавляем аудио если есть
+  let audioStream = null;
+  if (state.mediaFile) {
+    try {
+      const audioCtx = new AudioContext();
+      const arrayBuffer = await state.mediaFile.arrayBuffer();
+      const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+      const source = audioCtx.createBufferSource();
+      source.buffer = decoded;
+      const dest = audioCtx.createMediaStreamDestination();
+      source.connect(dest);
+      source.start(0);
+      audioStream = dest.stream;
+      audioStream.getAudioTracks().forEach(t => stream.addTrack(t));
+    } catch (e) {
+      console.warn('Аудио не добавлено:', e);
+    }
+  }
+
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9' : 'video/webm';
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: quality === 'high' ? 8000000 : quality === 'medium' ? 4000000 : 2000000 });
+  const chunks = [];
+  recorder.ondataavailable = e => chunks.push(e.data);
+
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `danixsik_${Date.now()}.webm`;
+    a.click();
+    setStatus('✓ Видео сохранено! (WebM)', 'ok');
+    document.getElementById('progressBar').style.width = '0%';
+  };
+
+  recorder.start();
+  setStatus('Рендеринг...', '');
+
+  // Рендерим кадры
+  const scale = width / 1080;
+
+  function drawExportFrame(seg, visibleCount, partialLine) {
+    ectx.clearRect(0, 0, width, height);
+    ectx.fillStyle = getBgColor();
+    ectx.fillRect(0, 0, width, height);
+
+    if (!seg) { drawWmExport(); return; }
+
+    const lines = partialLine != null
+      ? [...seg.lines.slice(0, visibleCount - 1), partialLine]
+      : seg.lines.slice(0, visibleCount);
+
+    const sz = state.fontSize * scale;
+    const lh = state.lineHeight * scale;
+    const totalH = lines.length * lh;
+    let startY = height / 2 - totalH / 2 + lh / 2;
+
+    ectx.textAlign = 'center';
+    ectx.textBaseline = 'middle';
+
+    lines.forEach((line, i) => {
+      const isLast = i === lines.length - 1;
+      const curSz = isLast ? sz : Math.max(sz - 6 * scale, 12);
+      ectx.font = `${state.fontWeight} ${curSz}px 'Montserrat', 'Arial Narrow', Arial, sans-serif`;
+      ectx.globalAlpha = isLast ? 1 : 0.7;
+      ectx.fillStyle = getFgColor();
+      ectx.fillText(line, width / 2, startY + i * lh);
+    });
+    ectx.globalAlpha = 1;
+    drawWmExport();
+  }
+
+  function drawWmExport() {
+    ectx.font = `300 ${22 * scale}px 'Montserrat', sans-serif`;
+    ectx.fillStyle = getWmColor();
+    ectx.textAlign = 'center';
+    ectx.textBaseline = 'middle';
+    ectx.fillText('danixsik', width / 2, height - 36 * scale);
+  }
+
+  let elapsed = 0;
+  const frameMs = 1000 / fps;
+  let segIdx = 0;
+  let timeInSeg = 0;
+
+  function renderNextFrame() {
+    const seg = state.segments[segIdx];
+    if (!seg || elapsed >= totalMs) {
+      recorder.stop();
+      return;
+    }
+
+    const frameInterval = seg.duration / seg.animFrames.length;
+    const frameIdx = Math.min(Math.floor(timeInSeg / frameInterval), seg.animFrames.length - 1);
+    const frame = seg.animFrames[frameIdx];
+
+    if (typeof frame === 'number') {
+      drawExportFrame(seg, frame, null);
+    } else {
+      drawExportFrame(seg, frame.count + 1, frame.partial);
+    }
+
+    timeInSeg += frameMs;
+    elapsed += frameMs;
+
+    if (timeInSeg >= seg.duration) {
+      timeInSeg = 0;
+      segIdx++;
+    }
+
+    const progress = (elapsed / totalMs) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+    setStatus(`Рендеринг: ${Math.round(progress)}%`, '');
+
+    setTimeout(renderNextFrame, 0);
+  }
+
+  renderNextFrame();
+}
+
+// ═══════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════
+function setStatus(msg, type) {
+  const el = document.getElementById('exportStatus');
+  el.textContent = msg;
+  el.className = 'export-status ' + (type || '');
+}
+
+// ═══════════════════════════════════════════════════════
+//  EVENTS
+// ═══════════════════════════════════════════════════════
+
+// Загрузка файла
+document.getElementById('mediaInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  state.mediaFile = file;
+  state.mediaType = file.type.startsWith('video') ? 'video' : 'audio';
+  document.getElementById('uploadName').textContent = file.name;
+  setStatus(`Загружен: ${file.name}`, 'ok');
+});
+
+// Drag & drop
+const uploadArea = document.getElementById('uploadArea');
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor = '#fff'; });
+uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadArea.style.borderColor = '';
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  state.mediaFile = file;
+  state.mediaType = file.type.startsWith('video') ? 'video' : 'audio';
+  document.getElementById('uploadName').textContent = file.name;
+  setStatus(`Загружен: ${file.name}`, 'ok');
+});
+
+// Кнопки режима
+document.querySelectorAll('[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.mode = btn.dataset.mode;
+    document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (state.segments.length) parseSegments();
+  });
+});
+
+// Кнопки фона
+document.querySelectorAll('[data-bg]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.bg = btn.dataset.bg;
+    document.querySelectorAll('[data-bg]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cc = document.getElementById('canvasContainer');
+    cc.classList.toggle('white-bg', state.bg === 'white');
+    drawFrameFromState();
+  });
+});
+
+// Шрифт
+document.getElementById('fontSizeRange').addEventListener('input', e => {
+  state.fontSize = parseInt(e.target.value);
+  document.getElementById('fontSizeVal').textContent = state.fontSize + 'px';
+  drawFrameFromState();
+});
+
+document.getElementById('lineHeightRange').addEventListener('input', e => {
+  state.lineHeight = parseInt(e.target.value);
+  document.getElementById('lineHeightVal').textContent = state.lineHeight + 'px';
+  drawFrameFromState();
+});
+
+document.getElementById('fontWeightSel').addEventListener('change', e => {
+  state.fontWeight = parseInt(e.target.value);
+  drawFrameFromState();
+});
+
+// Кнопки
+document.getElementById('parseBtn').addEventListener('click', parseSegments);
+document.getElementById('detectBpmBtn').addEventListener('click', detectBpm);
+document.getElementById('addSegBtn').addEventListener('click', () => {
+  const t = prompt('Текст нового сегмента:');
+  if (!t) return;
+  const dur = parseInt(prompt('Длительность (ms):', '1000')) || 1000;
+  const pyramidLines = buildPyramidLines(t);
+  state.segments.push({ text: t, lines: pyramidLines, animFrames: buildAnimFrames(pyramidLines, state.mode), duration: dur });
+  renderSegmentsList();
+});
+document.getElementById('clearSegBtn').addEventListener('click', () => {
+  if (confirm('Удалить все сегменты?')) { state.segments = []; renderSegmentsList(); document.getElementById('segmentsBlock').style.display = 'none'; }
+});
+document.getElementById('playBtn').addEventListener('click', () => {
+  if (state.playing) stopPreview(); else startPreview();
+});
+document.getElementById('exportBtn').addEventListener('click', exportVideo);
+
+// Клавиши для навигации по кадрам
+document.addEventListener('keydown', e => {
+  if (!state.segments.length) return;
+  const seg = state.segments[state.currentSeg];
+  if (!seg) return;
+  if (e.key === 'ArrowRight') {
+    state.animFrame = Math.min(state.animFrame + 1, seg.animFrames.length - 1);
+    drawFrameFromState();
+  } else if (e.key === 'ArrowLeft') {
+    state.animFrame = Math.max(state.animFrame - 1, 0);
+    drawFrameFromState();
+  } else if (e.key === 'ArrowDown') {
+    if (state.currentSeg < state.segments.length - 1) { state.animFrame = 0; selectSeg(state.currentSeg + 1); }
+  } else if (e.key === 'ArrowUp') {
+    if (state.currentSeg > 0) { state.animFrame = 0; selectSeg(state.currentSeg - 1); }
+  }
+});
+
+// Начальный кадр
+drawFrame(null, 0);
+</script>
+</body>
+</html>
